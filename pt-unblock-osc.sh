@@ -16,7 +16,7 @@ tabName=$2 #Table Name Argument 2
 
 while true;
 do
-blocking=$(mysql --skip-column-names -BNe "select count(1) from information_schema.processlist where DB = \"$dbName\" and USER = 'system user' and STATE = 'Waiting for table metadata lock' limit 1;") 
+blocking = $(mysql --skip-column-names -BNe "select count(1) from information_schema.processlist where DB = \"$dbName\" and USER = 'system user' and STATE = 'Waiting for table metadata lock' limit 1;") 
 while [ $blocking -eq 1 ]
 do
         mysql -e "insert into mysql.PTOSC_KILLED_PROCESSLIST(id,user,host,db,command,time,state,info,time_ms,rows_sent,rows_examined,tid) select * from information_schema.processlist            where user not in (\"system user\") and command not in (\"Sleep\") and state not like \"%metadata lock%\" and db = \"${dbName}\"         and lower(replace(info,\"\`\",\" \")) like lower(\"% ${tabName} %\") order by time desc limit 1"
